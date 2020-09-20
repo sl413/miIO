@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
   ~ Copyright (c) 2018 Joerg Bayer
+  ~ Copyright (c) 2020 Vyacheslav Pisarevskiy
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -20,9 +21,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>de.sg-o.app</groupId>
+    <groupId>io.github.sl413.app</groupId>
     <artifactId>miio</artifactId>
-    <version>0.1.5-SNAPSHOT</version>
+    <version>0.1.6-SNAPSHOT</version>
 
     <name>miIO</name>
     <description>A miIO implementation.</description>
@@ -52,13 +53,22 @@
             </roles>
             <timezone>Europe/Berlin</timezone>
         </developer>
+        <developer>
+            <id>sl413</id>
+            <name>Vyacheslav Pisarevskiy</name>
+            <email>pisarevsc@gmail.com</email>
+            <url>https://sl413.github.io/</url>
+            <roles>
+                <role>developer</role>
+            </roles>
+            <timezone>Europe/Samara</timezone>
+        </developer>
     </developers>
 
     <scm>
-        <connection>scm:git:https://github.com/SG-O/miIO.git</connection>
-        <developerConnection>scm:git:https://git.sg-o.de/root/miio.git</developerConnection>
+        <connection>scm:git:https://github.com/sl413/miIO.git</connection>
         <tag>HEAD</tag>
-        <url>https://github.com/SG-O/miIO</url>
+        <url>https://github.com/sl413/miIO</url>
     </scm>
 
     <build>
@@ -68,14 +78,17 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.7.0</version>
                 <configuration>
-                    <source>7</source>
-                    <target>7</target>
+                    <source>1.8</source>
+                    <target>1.8</target>
                 </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.21.0</version>
+                <configuration>
+                    <skipTests>true</skipTests>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.jacoco</groupId>
@@ -123,16 +136,23 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.0.1</version>
-                <configuration>
-
-                </configuration>
+                <version>3.1.1</version>
                 <executions>
                     <execution>
                         <id>attach-javadocs</id>
                         <goals>
                             <goal>jar</goal>
                         </goals>
+                        <configuration>
+                            <use>false</use>
+                            <use>false</use>
+                            <source>1.8</source>
+                            <links>
+                                <link>http://docs.oracle.com/javase/8/docs/api/</link>
+                                <link>http://docs.oracle.com/javase/7/docs/api/</link>
+                            </links>
+                            <doclint>none</doclint>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
@@ -148,6 +168,7 @@
                             <goal>sign</goal>
                         </goals>
                         <configuration>
+                            <skip>true</skip>
                             <gpgArguments>
                                 <arg>--pinentry-mode</arg>
                                 <arg>loopback</arg>
@@ -171,24 +192,26 @@
             </plugin>
         </plugins>
     </build>
+
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.12</version>
+            <version>4.13</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
-            <version>20180130</version>
+            <version>20200518</version>
         </dependency>
         <dependency>
             <groupId>joda-time</groupId>
             <artifactId>joda-time</artifactId>
-            <version>2.10</version>
+            <version>2.10.6</version>
         </dependency>
     </dependencies>
+
     <distributionManagement>
         <snapshotRepository>
             <id>ossrh</id>
