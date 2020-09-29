@@ -1,0 +1,98 @@
+plugins {
+    id 'java'
+    id 'maven-publish'
+    id 'signing'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+    withJavadocJar()
+    withSourcesJar()
+}
+
+group 'io.github.sl413.app'
+archivesBaseName = 'miio'
+version = System.getenv('RELEASE_VERSION') ?: "0.0.1"
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+//    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.5.2'
+//    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.5.2'
+    testCompile group: 'junit', name: 'junit', version: '4.13'
+    compile 'org.json:json:20200518'
+    compile 'joda-time:joda-time:2.10.6'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+jar {
+    from sourceSets.main.output
+    from sourceSets.main.allJava
+}
+
+signing {
+    sign publishing.publications
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            customizePom(pom)
+            groupId group
+            artifactId archivesBaseName
+            version version
+
+            from components.java
+        }
+    }
+}
+
+def customizePom(pom) {
+    pom.withXml {
+        def root = asNode()
+
+        root.dependencies.removeAll { dep ->
+            dep.scope == "test"
+        }
+
+        root.children().last() + {
+            resolveStrategy = DELEGATE_FIRST
+
+            description 'Some description of artifact'
+            name 'Artifct name'
+            url 'https://github.com/login/projectname'
+            organization {
+                name 'com.github.login'
+                url 'https://github.com/githublogin'
+            }
+            issueManagement {
+                system 'GitHub'
+                url 'https://github.com/githublogin/projectname/issues'
+            }
+            licenses {
+                license {
+                    name 'The Apache License, Version 2.0'
+                    url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                }
+            }
+            scm {
+                url 'https://github.com/githublogin/projectname'
+                connection 'scm:https://github.com/githublogin/projectname.git'
+                developerConnection 'scm:git://github.com/githublogin/projectname.git'
+            }
+            developers {
+                developer {
+                    id 'dev'
+                    name 'DevName'
+                    email 'email@dev.ru'
+                }
+            }
+        }
+    }
+}
