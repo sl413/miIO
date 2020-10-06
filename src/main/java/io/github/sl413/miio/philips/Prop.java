@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package miio.philips;
+package io.github.sl413.miio.philips;
 
 import de.sg_o.app.miio.base.CommandExecutionException;
 import org.json.JSONArray;

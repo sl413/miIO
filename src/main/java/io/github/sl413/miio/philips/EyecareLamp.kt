@@ -13,33 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package io.github.sl413.miio.philips
 
-package miio.philips;
-
-import de.sg_o.app.miio.base.CommandExecutionException;
-import de.sg_o.app.miio.base.Device;
-import de.sg_o.app.miio.base.Token;
-import org.json.JSONArray;
-
-import java.net.InetAddress;
-import java.util.Map;
+import de.sg_o.app.miio.base.CommandExecutionException
+import de.sg_o.app.miio.base.Token
+import io.github.sl413.miio.Device
+import org.json.JSONArray
+import java.net.InetAddress
 
 /**
  * Class for Xiaomi Philips smart lamp device
  */
-@SuppressWarnings("WeakerAccess")
-public class EyecareLamp extends Device {
-
-    /**
-     * @param ip      The IP address of the light to connect to. If the address is null the first light that was found will be chosen
-     * @param token   The token for that device. If the token is null the token will be extracted from unprovisioned devices
-     * @param timeout The timeout for the communication
-     * @param retries The number of retries after a failed communication
-     */
-    public EyecareLamp(InetAddress ip, Token token, int timeout, int retries) {
-        super(ip, token, new String[]{"philips.light.sread1"}, timeout, retries);
-    }
-
+class EyecareLamp
+/**
+ * @param ip      The IP address of the light to connect to. If the address is null the first light that was found will be chosen
+ * @param token   The token for that device. If the token is null the token will be extracted from unprovisioned devices
+ * @param timeout The timeout for the communication
+ * @param retries The number of retries after a failed communication
+ */
+(ip: InetAddress?, token: Token?, timeout: Int, retries: Int) : Device(ip, token, arrayOf("philips.light.sread1"), timeout, retries) {
     /**
      * Get several property values at once from the device
      *
@@ -47,9 +39,10 @@ public class EyecareLamp extends Device {
      * @return The property names and values
      * @throws CommandExecutionException When there has been a error during the communication or the response was invalid
      */
-    public Map<Prop.Names, String> getProps(Prop.Names[] props) throws CommandExecutionException {
-        Prop prop = new Prop(props);
-        return prop.parseResponse(sendToArray("get_prop", prop.getRequestArray()));
+    @Throws(CommandExecutionException::class)
+    fun getProps(props: Array<Prop.Names>?): Map<Prop.Names, String> {
+        val prop = Prop(props)
+        return prop.parseResponse(sendToArray("get_prop", prop.requestArray))
     }
 
     /**
@@ -59,11 +52,11 @@ public class EyecareLamp extends Device {
      * @return The value of the specified property name
      * @throws CommandExecutionException When there has been a error during the communication or the response was invalid
      */
-    public String getSingleProp(Prop.Names prop) throws CommandExecutionException {
-        Map<Prop.Names, String> value = getProps(new Prop.Names[]{prop});
-        String valueString = value.get(prop);
-        if (valueString == null) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_RESPONSE);
-        return valueString;
+    @Throws(CommandExecutionException::class)
+    fun getSingleProp(prop: Prop.Names): String {
+        val value = getProps(arrayOf(prop))
+        return value[prop]
+                ?: throw CommandExecutionException(CommandExecutionException.Error.INVALID_RESPONSE)
     }
 
     /**
@@ -73,13 +66,14 @@ public class EyecareLamp extends Device {
      * @return The value of the specified property name
      * @throws CommandExecutionException When there has been a error during the communication or the response was invalid
      */
-    public int getIntProp(Prop.Names prop) throws CommandExecutionException {
-        String value = getSingleProp(prop);
-        if (value.equals("")) throw new CommandExecutionException(CommandExecutionException.Error.INVALID_RESPONSE);
-        try {
-            return Integer.parseInt(value);
-        } catch (Exception e) {
-            throw new CommandExecutionException(CommandExecutionException.Error.INVALID_RESPONSE);
+    @Throws(CommandExecutionException::class)
+    fun getIntProp(prop: Prop.Names): Int {
+        val value = getSingleProp(prop)
+        if (value == "") throw CommandExecutionException(CommandExecutionException.Error.INVALID_RESPONSE)
+        return try {
+            value.toInt()
+        } catch (e: Exception) {
+            throw CommandExecutionException(CommandExecutionException.Error.INVALID_RESPONSE)
         }
     }
 
@@ -87,8 +81,9 @@ public class EyecareLamp extends Device {
      * @return Thoggle the devices power
      * @throws CommandExecutionException When there has been a error during the communication or the response was invalid
      */
-    public boolean togglePower() throws CommandExecutionException {
-        return sendOk("toggle", new JSONArray());
+    @Throws(CommandExecutionException::class)
+    fun togglePower(): Boolean {
+        return sendOk("toggle", JSONArray())
     }
 
     /**
@@ -96,95 +91,100 @@ public class EyecareLamp extends Device {
      * @return True if the command was received successfully
      * @throws CommandExecutionException When there has been a error during the communication or the response was invalid
      */
-    public boolean setPower(boolean on) throws CommandExecutionException {
-        JSONArray col = new JSONArray();
-        col.put(on ? "on" : "off");
-        return sendOk("set_power", col);
+    @Throws(CommandExecutionException::class)
+    fun setPower(on: Boolean): Boolean {
+        val col = JSONArray()
+        col.put(if (on) "on" else "off")
+        return sendOk("set_power", col)
     }
 
     /**
      * @return The lamp power state
      * @throws CommandExecutionException When there has been a error during the communication or the response was invalid
      */
-    public boolean isOn() throws CommandExecutionException {
-        return getSingleProp(Prop.Names.POWER).equals("on");
-    }
+    @get:Throws(CommandExecutionException::class)
+    val isOn: Boolean
+        get() = getSingleProp(Prop.Names.POWER) == "on"
 
     /**
      * @param on True: turn the ambient light on; False: turn the ambient light off
      * @return True if the command was received successfully
      * @throws CommandExecutionException When there has been a error during the communication or the response was invalid
      */
-    public boolean setAmbientLightPower(boolean on) throws CommandExecutionException {
-        JSONArray col = new JSONArray();
-        col.put(on ? "on" : "off");
-        return sendOk("enable_amb", col);
+    @Throws(CommandExecutionException::class)
+    fun setAmbientLightPower(on: Boolean): Boolean {
+        val col = JSONArray()
+        col.put(if (on) "on" else "off")
+        return sendOk("enable_amb", col)
     }
 
     /**
      * @return The ambient light power state
      * @throws CommandExecutionException When there has been a error during the communication or the response was invalid
      */
-    public boolean isAmbientLightOn() throws CommandExecutionException {
-        return getSingleProp(Prop.Names.AMBIENT_LIGHT_POWER).equals("on");
-    }
+    @get:Throws(CommandExecutionException::class)
+    val isAmbientLightOn: Boolean
+        get() = getSingleProp(Prop.Names.AMBIENT_LIGHT_POWER) == "on"
 
     /**
      * @param brightness The brightness to change to. 1-100
      * @return True if the command was received successfully
      * @throws CommandExecutionException When there has been a error during the communication or the response was invalid
      */
-    public boolean setBrightness(int brightness) throws CommandExecutionException {
-        JSONArray col = new JSONArray();
-        col.put(brightness);
-        return sendOk("set_bright", col);
+    @Throws(CommandExecutionException::class)
+    fun setBrightness(brightness: Int): Boolean {
+        val col = JSONArray()
+        col.put(brightness)
+        return sendOk("set_bright", col)
     }
 
     /**
      * @return The brightness the device is currently set to
      * @throws CommandExecutionException When there has been a error during the communication or the response was invalid
      */
-    public int getBrightness() throws CommandExecutionException {
-        return getIntProp(Prop.Names.BRIGHTNESS);
-    }
+    @get:Throws(CommandExecutionException::class)
+    val brightness: Int
+        get() = getIntProp(Prop.Names.BRIGHTNESS)
 
     /**
      * @param brightness The brightness to change to. 1-100
      * @return True if the command was received successfully
      * @throws CommandExecutionException When there has been a error during the communication or the response was invalid
      */
-    public boolean setAmbientLightBrightness(int brightness) throws CommandExecutionException {
-        JSONArray col = new JSONArray();
-        col.put(brightness);
-        return sendOk("set_amb_bright", col);
+    @Throws(CommandExecutionException::class)
+    fun setAmbientLightBrightness(brightness: Int): Boolean {
+        val col = JSONArray()
+        col.put(brightness)
+        return sendOk("set_amb_bright", col)
     }
 
     /**
      * @return The brightness the ambient light is currently set to
      * @throws CommandExecutionException When there has been a error during the communication or the response was invalid
      */
-    public int getAmbientLightBrightness() throws CommandExecutionException {
-        return getIntProp(Prop.Names.AMBIENT_LIGHT_BRIGHTNESS);
-    }
+    @get:Throws(CommandExecutionException::class)
+    val ambientLightBrightness: Int
+        get() = getIntProp(Prop.Names.AMBIENT_LIGHT_BRIGHTNESS)
 
     /**
      * @param on True: turn the eyecare mode on; False: turn the eyecare mode off
      * @return True if the command was received successfully
      * @throws CommandExecutionException When there has been a error during the communication or the response was invalid
      */
-    public boolean setEyecare(boolean on) throws CommandExecutionException {
-        JSONArray col = new JSONArray();
-        col.put(on ? "on" : "off");
-        return sendOk("notify_on", col);
+    @Throws(CommandExecutionException::class)
+    fun setEyecare(on: Boolean): Boolean {
+        val col = JSONArray()
+        col.put(if (on) "on" else "off")
+        return sendOk("notify_on", col)
     }
 
     /**
      * @return The eyecare mode state
      * @throws CommandExecutionException When there has been a error during the communication or the response was invalid
      */
-    public boolean isEyecareOn() throws CommandExecutionException {
-        return getSingleProp(Prop.Names.EYECARE_MODE).equals("on");
-    }
+    @get:Throws(CommandExecutionException::class)
+    val isEyecareOn: Boolean
+        get() = getSingleProp(Prop.Names.EYECARE_MODE) == "on"
 
     /**
      * Turn on eyecare scene for the activity: study, reading, phone, default
@@ -193,19 +193,20 @@ public class EyecareLamp extends Device {
      * @return True if the command was received successfully
      * @throws CommandExecutionException When there has been a error during the communication or the response was invalid
      */
-    public boolean setUserScene(int mode) throws CommandExecutionException {
-        JSONArray col = new JSONArray();
-        col.put(mode);
-        return sendOk("set_user_scene", col);
+    @Throws(CommandExecutionException::class)
+    fun setUserScene(mode: Int): Boolean {
+        val col = JSONArray()
+        col.put(mode)
+        return sendOk("set_user_scene", col)
     }
 
     /**
      * @return The eyecare scene number
      * @throws CommandExecutionException When there has been a error during the communication or the response was invalid
      */
-    public int getUserScene() throws CommandExecutionException {
-        return getIntProp(Prop.Names.SCENE_MODE);
-    }
+    @get:Throws(CommandExecutionException::class)
+    val userScene: Int
+        get() = getIntProp(Prop.Names.SCENE_MODE)
 
     /**
      * Turn on lamp blinking every 40 minutes
@@ -214,19 +215,20 @@ public class EyecareLamp extends Device {
      * @return True if the command was received successfully
      * @throws CommandExecutionException When there has been a error during the communication or the response was invalid
      */
-    public boolean setEyeStrainReminder(boolean on) throws CommandExecutionException {
-        JSONArray col = new JSONArray();
-        col.put(on ? "on" : "off");
-        return sendOk("set_notifyuser", col);
+    @Throws(CommandExecutionException::class)
+    fun setEyeStrainReminder(on: Boolean): Boolean {
+        val col = JSONArray()
+        col.put(if (on) "on" else "off")
+        return sendOk("set_notifyuser", col)
     }
 
     /**
      * @return The eyecare mode state
      * @throws CommandExecutionException When there has been a error during the communication or the response was invalid
      */
-    public boolean isEyeStrainReminderOn() throws CommandExecutionException {
-        return getSingleProp(Prop.Names.EYE_FATIGUE_REMINDER).equals("on");
-    }
+    @get:Throws(CommandExecutionException::class)
+    val isEyeStrainReminderOn: Boolean
+        get() = getSingleProp(Prop.Names.EYE_FATIGUE_REMINDER) == "on"
 
     /**
      * When the lamp is turned on in the dark, it only turns on ambient light first
@@ -235,19 +237,20 @@ public class EyecareLamp extends Device {
      * @return True if the command was received successfully
      * @throws CommandExecutionException When there has been a error during the communication or the response was invalid
      */
-    public boolean setNightMode(boolean on) throws CommandExecutionException {
-        JSONArray col = new JSONArray();
-        col.put(on ? "on" : "off");
-        return sendOk("enable_bl", col);
+    @Throws(CommandExecutionException::class)
+    fun setNightMode(on: Boolean): Boolean {
+        val col = JSONArray()
+        col.put(if (on) "on" else "off")
+        return sendOk("enable_bl", col)
     }
 
     /**
      * @return The night mode state
      * @throws CommandExecutionException When there has been a error during the communication or the response was invalid
      */
-    public boolean isNightModeOn() throws CommandExecutionException {
-        return getSingleProp(Prop.Names.NIGHT_LIGHT).equals("on");
-    }
+    @get:Throws(CommandExecutionException::class)
+    val isNightModeOn: Boolean
+        get() = getSingleProp(Prop.Names.NIGHT_LIGHT) == "on"
 
     /**
      * Power the device off after some time
@@ -256,25 +259,26 @@ public class EyecareLamp extends Device {
      * @return True if the command was received successfully.\
      * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.\
      */
-    public boolean setTimeUntilPowerOff(int minutes) throws CommandExecutionException {
-        JSONArray col = new JSONArray();
-        col.put(minutes);
-        return sendOk("delay_off", col);
+    @Throws(CommandExecutionException::class)
+    fun setTimeUntilPowerOff(minutes: Int): Boolean {
+        val col = JSONArray()
+        col.put(minutes)
+        return sendOk("delay_off", col)
     }
 
     /**
      * @return The time until the device is turned off in minutes
      * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
      */
-    public int getTimeUntilPowerOff() throws CommandExecutionException {
-        return getIntProp(Prop.Names.SLEEP_TIME_LEFT);
-    }
+    @get:Throws(CommandExecutionException::class)
+    val timeUntilPowerOff: Int
+        get() = getIntProp(Prop.Names.SLEEP_TIME_LEFT)
 
     /**
      * @return Current all lamp props state
      * @throws CommandExecutionException When there has been a error during the communication or the response was invalid.
      */
-    public Map<Prop.Names, String> getStatus() throws CommandExecutionException {
-        return getProps(Prop.Names.values());
-    }
+    @get:Throws(CommandExecutionException::class)
+    val status: Map<Prop.Names, String>
+        get() = getProps(Prop.Names.values())
 }
